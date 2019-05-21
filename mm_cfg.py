@@ -76,6 +76,9 @@ MAILMAN_OWNER     = 'root@%%fqdn%%'
 PUBLIC_ARCHIVE_URL = '/pipermail/%(listname)s'
 PRIVATE_ARCHIVE_URL = '/cgi-bin/mailman/private/%(listname)s'
 DEFAULT_ARCHIVE_PRIVATE    = 1                    # 0=public, 1=private
+DELIVERY_MODULE = 'SMTPDirect'
+SMTPHOST = 'localhost'
+SMTPPORT = 10025
 
 DEFAULT_SERVER_LANGUAGE = 'fr'
 

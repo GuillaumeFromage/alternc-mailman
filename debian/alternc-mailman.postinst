@@ -6,6 +6,8 @@ CONFIGFILE="/etc/alternc/local.sh"
 MAILMAN_CONFIG="/etc/mailman/mm_cfg.py"
 MAILMAN_CONFIG_TEMPLATE="/etc/alternc/templates/mailman/mm_cfg.py"
 MAILMAN_CONFIG_BACKUP="/var/lib/alternc/backups/etc-mailman-mm_cfg.py"
+MASTERCF_CONFIG_TEMPLATE="/etc/alternc/templates/postfix/master.cf"
+MASTERCF_CONFIG="/etc/postfix/master.cf"
 MAILMAN_PASS="`perl -e 'print map{("a".."z","A".."Z",0..9)[int(rand(62))]}(1..10)' `" # copy-pasted from alternc/debian/config
 
 # new packages put binaries in /usr/lib/mailman/bin
@@ -23,6 +25,16 @@ case "$1" in
     # Then, configure the quota for "mailman"
     /usr/lib/alternc/quota_init mailman 0 
 
+    cat | tee -a $MASTERCF_CONFIG_TEMPLATE >> $MASTERCF_CONFIG << EOG
+10025      inet  n      -       -       -       -       smtpd
+  -o content_filter=
+  -o smtpd_client_connection_count_limit=100
+  -o qmgr_message_recipient_limit = 40000
+  -o disable_dns_lookups = yes
+  -o inet_interfaces=127.0.0.1
+EOG
+    
+    invoke-rc.d postfix reload
     echo "fixing private archive rights for mailman"
     dpkg-statoverride --list /var/lib/mailman/archives/private >/dev/null || 
     dpkg-statoverride --add root list 2775 /var/lib/mailman/archives/private
